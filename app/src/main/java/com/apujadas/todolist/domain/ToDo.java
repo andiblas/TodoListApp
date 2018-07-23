@@ -1,18 +1,18 @@
 package com.apujadas.todolist.domain;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 public class ToDo {
 
-    private LocalDateTime date;
+    private Date date;
     private String text;
-    private boolean isDone;
+    private boolean done;
 
-    public LocalDateTime getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 
@@ -25,10 +25,10 @@ public class ToDo {
     }
 
     public boolean isDone() {
-        return isDone;
+        return done;
     }
 
     public void setDone(boolean done) {
-        isDone = done;
+        this.done = done;
     }
 }
