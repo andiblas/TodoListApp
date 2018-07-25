@@ -14,5 +14,5 @@ public interface TodoListClient {
 
     void deleteTodo();
 
-    List<ToDo> getAllTodos() throws IOException;
+    List<ToDo> getAllTodos() throws IOException, ServerException;
 }

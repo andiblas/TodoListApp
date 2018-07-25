@@ -3,10 +3,12 @@ package com.apujadas.todolist.connectivity;
 import com.apujadas.todolist.bean.HALResponse;
 import com.apujadas.todolist.connectivity.json.JSONParser;
 import com.apujadas.todolist.domain.ToDo;
-import com.google.gson.reflect.TypeToken;
+import com.apujadas.todolist.resilience.annotations.Cache;
+import com.apujadas.todolist.resilience.annotations.CircuitBreaker;
+import com.apujadas.todolist.resilience.cache.InMemoryCacheProvider;
+import com.apujadas.todolist.resilience.cache.SlidingCacheExpirationPolicy;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.List;
 
 import okhttp3.HttpUrl;
@@ -26,7 +28,9 @@ public class AWSTodoListClient implements TodoListClient {
     }
 
     @Override
-    public List<ToDo> getAllTodos() throws IOException {
+    @CircuitBreaker(errorCount = 3, timerMiliseconds = 4000)
+    @Cache(provider = InMemoryCacheProvider.class, expirationPolicy = SlidingCacheExpirationPolicy.class)
+    public List<ToDo> getAllTodos() throws IOException, ServerException {
         HttpUrl url = HttpUrl.parse(BASE_URL).newBuilder()
                 .addPathSegment("todos")
                 .build();
@@ -35,8 +39,13 @@ public class AWSTodoListClient implements TodoListClient {
                 .build();
 
         Response res = client.newCall(request).execute();
-        HALResponse parsedRes = jsonParser.fromJson(res.body().string(), HALResponse.class);
-        return parsedRes.getEmbedded().getList();
+
+        if (res.isSuccessful()) {
+            HALResponse parsedRes = jsonParser.fromJson(res.body().string(), HALResponse.class);
+            return parsedRes.getEmbedded().getList();
+        } else {
+            throw new ServerException();
+        }
     }
 
     @Override

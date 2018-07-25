@@ -76,7 +76,7 @@ public class ToDoFragment extends Fragment {
     }
 
     public void updateList(List<com.apujadas.todolist.domain.ToDo> todos) {
-        list.setAdapter(new MyToDoRecyclerViewAdapter(todos, mListener));
+        list.setAdapter(new MyToDoRecyclerViewAdapter(todos != null ? todos : new ArrayList<>(), mListener));
     }
 
     /**

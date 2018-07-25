@@ -12,9 +12,11 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.apujadas.todolist.connectivity.AWSTodoListClient;
+import com.apujadas.todolist.connectivity.ClientExecutor;
 import com.apujadas.todolist.connectivity.TodoListClient;
 import com.apujadas.todolist.connectivity.json.GSONJsonParser;
 import com.apujadas.todolist.domain.ToDo;
+import com.apujadas.todolist.resilience.circuitbreaker.CircuitBreakerOpenException;
 
 import java.io.IOException;
 import java.util.List;
@@ -78,10 +80,11 @@ public class MainActivity extends AppCompatActivity implements ToDoFragment.OnLi
         }
 
         protected List<ToDo> doInBackground(Void... v) {
-            TodoListClient client = new AWSTodoListClient(new GSONJsonParser());
+            ClientExecutor executor = new ClientExecutor(new AWSTodoListClient(new GSONJsonParser()));
             try {
-                return client.getAllTodos();
-            } catch (IOException e) {
+                return executor.getAllTodos();
+            } catch (Exception e) {
+                e.printStackTrace();
                 return null;
             }
         }
