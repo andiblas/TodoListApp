@@ -1,5 +1,6 @@
 package com.apujadas.todolist;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -33,10 +34,6 @@ public class MainActivity extends AppCompatActivity implements ToDoFragment.OnLi
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
-
         textView1 = findViewById(R.id.textView);
     }
 
@@ -69,6 +66,10 @@ public class MainActivity extends AppCompatActivity implements ToDoFragment.OnLi
     @Override
     public void onListFragmentInteraction(ToDo item) {
 
+    }
+
+    public void addToDo(View view) {
+        startActivity(new Intent(getApplicationContext(), TodoAddEdit.class));
     }
 
     private static class GetTodosTask extends AsyncTask<Void, Void, List<ToDo>> {

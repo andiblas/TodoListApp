@@ -1,5 +1,7 @@
 package com.apujadas.todolist.connectivity;
 
+import com.apujadas.todolist.domain.ToDo;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
@@ -12,11 +14,10 @@ class AnnotationObtainer {
         this.method = method;
     }
 
-
-    public <T> T getAnnotation(Class<? extends Annotation> classDefinition) {
+    public <T> T getAnnotation(Class<? extends Annotation> classDefinition, Class<?>... parametersTypes) {
         Method m = null;
         try {
-            m = target.getClass().getMethod(method);
+            m = target.getClass().getMethod(method, parametersTypes);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }

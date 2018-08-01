@@ -1,6 +1,7 @@
 package com.apujadas.todolist.connectivity;
 
 import com.apujadas.todolist.domain.ToDo;
+import com.apujadas.todolist.resilience.annotations.Retry;
 import com.apujadas.todolist.resilience.cache.Cache;
 import com.apujadas.todolist.resilience.cache.CacheExpirationPolicy;
 import com.apujadas.todolist.resilience.cache.CacheProvider;
@@ -9,6 +10,7 @@ import com.apujadas.todolist.resilience.cache.InvalidCacheException;
 import com.apujadas.todolist.resilience.circuitbreaker.CircuitBreaker;
 import com.apujadas.todolist.resilience.circuitbreaker.CircuitBreakerRegistry;
 
+import java.io.IOException;
 import java.util.List;
 
 public class ClientExecutor {
@@ -32,7 +34,7 @@ public class ClientExecutor {
             } catch (InvalidCacheException ignored) {
             }
         }
-        
+
         com.apujadas.todolist.resilience.annotations.CircuitBreaker circuitBreakerAnnotation;
         if ((circuitBreakerAnnotation = annotationObtainer.getAnnotation(com.apujadas.todolist.resilience.annotations.CircuitBreaker.class)) != null) {
             CircuitBreaker cb = obtainCircuitBreaker(methodName, circuitBreakerAnnotation.errorCount(), circuitBreakerAnnotation.timerMiliseconds());
@@ -42,11 +44,36 @@ public class ClientExecutor {
         return processReturn(client.getAllTodos(), cache);
     }
 
+
+    public void addTodo(ToDo todo) throws IOException, ServerException {
+        String methodName = "addTodo";
+        AnnotationObtainer annotationObtainer = new AnnotationObtainer(client, methodName);
+
+        Retry retryAnnotation;
+        if ((retryAnnotation = annotationObtainer.getAnnotation(Retry.class, ToDo.class)) != null) {
+            for (int i = 0; i < retryAnnotation.count(); i++) {
+                try {
+                    client.addTodo(todo);
+                    break;
+                } catch (Exception e) {
+                    if (i >= retryAnnotation.count()) {
+                        throw e;
+                    }
+                }
+            }
+            return;
+        }
+
+        client.addTodo(todo);
+    }
+
+
     private <T> T processReturn(T value, Cache cache) {
         if (cache != null)
             cache.setCache(value);
         return value;
     }
+
 
     private com.apujadas.todolist.resilience.cache.Cache obtainCache(String key, Class<? extends CacheProvider> provider, Class<? extends CacheExpirationPolicy> expirationPolicy) {
         com.apujadas.todolist.resilience.cache.Cache cache = CacheRegistry.getInstance().getCache(key);

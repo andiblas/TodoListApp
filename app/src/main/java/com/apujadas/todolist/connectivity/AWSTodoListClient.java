@@ -5,6 +5,7 @@ import com.apujadas.todolist.connectivity.json.JSONParser;
 import com.apujadas.todolist.domain.ToDo;
 import com.apujadas.todolist.resilience.annotations.Cache;
 import com.apujadas.todolist.resilience.annotations.CircuitBreaker;
+import com.apujadas.todolist.resilience.annotations.Retry;
 import com.apujadas.todolist.resilience.cache.InMemoryCacheProvider;
 import com.apujadas.todolist.resilience.cache.SlidingCacheExpirationPolicy;
 
@@ -12,8 +13,10 @@ import java.io.IOException;
 import java.util.List;
 
 import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class AWSTodoListClient implements TodoListClient {
@@ -66,7 +69,7 @@ public class AWSTodoListClient implements TodoListClient {
     public void disableServer() throws IOException {
         HttpUrl url = HttpUrl.parse(BASE_URL).newBuilder()
                 .addPathSegment("state")
-                .addPathSegment("on")
+                .addPathSegment("off")
                 .build();
         Request request = new Request.Builder()
                 .url(url)
@@ -77,12 +80,26 @@ public class AWSTodoListClient implements TodoListClient {
     }
 
     @Override
-    public void addTodo() {
+    @Retry(count = 2)
+    public void addTodo(ToDo todo) throws IOException, ServerException {
+        HttpUrl url = HttpUrl.parse(BASE_URL).newBuilder()
+                .addPathSegment("todos")
+                .build();
 
+        RequestBody body = RequestBody.create(MediaType.get("application/json"),
+                jsonParser.toJson(todo));
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        Response res = client.newCall(request).execute();
+        if (!res.isSuccessful())
+            throw new ServerException();
     }
 
     @Override
-    public void deleteTodo() {
-
+    public void deleteTodo(ToDo todo) {
     }
 }

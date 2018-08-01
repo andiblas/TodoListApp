@@ -10,9 +10,9 @@ public interface TodoListClient {
 
     void disableServer() throws IOException;
 
-    void addTodo();
+    void addTodo(ToDo todo) throws IOException, ServerException;
 
-    void deleteTodo();
+    void deleteTodo(ToDo todo);
 
     List<ToDo> getAllTodos() throws IOException, ServerException;
 }
