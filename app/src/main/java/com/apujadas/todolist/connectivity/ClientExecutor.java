@@ -67,6 +67,50 @@ public class ClientExecutor {
         client.addTodo(todo);
     }
 
+    public void enableServer() throws IOException, ServerException {
+        String methodName = "enableServer";
+        AnnotationObtainer annotationObtainer = new AnnotationObtainer(client, methodName);
+
+        Retry retryAnnotation;
+        if ((retryAnnotation = annotationObtainer.getAnnotation(Retry.class, ToDo.class)) != null) {
+            for (int i = 0; i < retryAnnotation.count(); i++) {
+                try {
+                    client.enableServer();
+                    break;
+                } catch (Exception e) {
+                    if (i >= retryAnnotation.count()) {
+                        throw e;
+                    }
+                }
+            }
+            return;
+        }
+
+        client.enableServer();
+    }
+
+    public void disableServer() throws IOException, ServerException {
+        String methodName = "disableServer";
+        AnnotationObtainer annotationObtainer = new AnnotationObtainer(client, methodName);
+
+        Retry retryAnnotation;
+        if ((retryAnnotation = annotationObtainer.getAnnotation(Retry.class, ToDo.class)) != null) {
+            for (int i = 0; i < retryAnnotation.count(); i++) {
+                try {
+                    client.disableServer();
+                    break;
+                } catch (Exception e) {
+                    if (i >= retryAnnotation.count()) {
+                        throw e;
+                    }
+                }
+            }
+            return;
+        }
+
+        client.disableServer();
+    }
+
 
     private <T> T processReturn(T value, Cache cache) {
         if (cache != null)

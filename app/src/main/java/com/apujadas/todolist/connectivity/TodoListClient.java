@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.List;
 
 public interface TodoListClient {
-    void enableServer() throws IOException;
+    void enableServer() throws IOException, ServerException;
 
-    void disableServer() throws IOException;
+    void disableServer() throws IOException, ServerException;
 
     void addTodo(ToDo todo) throws IOException, ServerException;
 

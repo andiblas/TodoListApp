@@ -11,7 +11,7 @@ public class GSONJsonParser implements JSONParser {
 
     @Override
     public String toJson(Object object) {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
         return gson.toJson(object);
     }
 

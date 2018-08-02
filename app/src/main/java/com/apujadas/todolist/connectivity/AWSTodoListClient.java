@@ -52,7 +52,8 @@ public class AWSTodoListClient implements TodoListClient {
     }
 
     @Override
-    public void enableServer() throws IOException {
+    @Retry(count = 2)
+    public void enableServer() throws IOException, ServerException {
         HttpUrl url = HttpUrl.parse(BASE_URL).newBuilder()
                 .addPathSegment("state")
                 .addPathSegment("on")
@@ -63,10 +64,13 @@ public class AWSTodoListClient implements TodoListClient {
                 .build();
 
         Response res = client.newCall(request).execute();
+        if (!res.isSuccessful())
+            throw new ServerException();
     }
 
     @Override
-    public void disableServer() throws IOException {
+    @Retry(count = 2)
+    public void disableServer() throws IOException, ServerException {
         HttpUrl url = HttpUrl.parse(BASE_URL).newBuilder()
                 .addPathSegment("state")
                 .addPathSegment("off")
@@ -77,6 +81,8 @@ public class AWSTodoListClient implements TodoListClient {
                 .build();
 
         Response res = client.newCall(request).execute();
+        if (!res.isSuccessful())
+            throw new ServerException();
     }
 
     @Override
