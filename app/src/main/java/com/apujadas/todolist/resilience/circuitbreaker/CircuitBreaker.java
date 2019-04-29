@@ -1,7 +1,5 @@
 package com.apujadas.todolist.resilience.circuitbreaker;
 
-import com.apujadas.todolist.connectivity.ServerException;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -19,7 +17,7 @@ public class CircuitBreaker {
         this.errorCount = 0;
     }
 
-    public <T> T run(CircuitBreakerCommand<T> command) throws Exception, CircuitBreakerOpenException {
+    public <T> T run(CircuitBreakerCommand<T> command) throws Exception {
         T result;
         try {
             if (CircuitBreakerState.OPEN.equals(state))
@@ -37,7 +35,7 @@ public class CircuitBreaker {
             if (this.errorCount < this.errorLimit)
                 this.errorCount++;
 
-            if (this.errorCount == this.errorLimit) {
+            if (this.errorCount.equals(this.errorLimit)) {
                 trip();
                 startTimer();
             }
