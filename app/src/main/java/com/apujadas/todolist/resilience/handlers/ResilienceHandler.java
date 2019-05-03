@@ -15,7 +15,10 @@ public abstract class ResilienceHandler {
         if ((annotation = method.getDeclaredAnnotation(classToHandle())) != null) {
             return handleInternal(annotation, o, method, args);
         }
-        return successor.handle(o, method, args);
+        if (successor != null)
+            return successor.handle(o, method, args);
+        else
+            return method.invoke(o, args);
     }
 
     public abstract Class<? extends Annotation> classToHandle();
